@@ -1,14 +1,10 @@
 """
-Basic Evaluation Example for AgentUnit
---------------------------------------
-
-This script demonstrates how to run a minimal evaluation using
-AgentUnit with a FakeAdapter. It is designed for beginners and does
-not require any extra dependencies.
+A minimal working example that demonstrates how to use a custom adapter
+with the AgentUnit framework.
 """
 
-from agentunit.core.evaluator import Evaluator
-from agentunit.core.adapters import BaseAdapter
+from agentunit.adapters.base import BaseAdapter
+from agentunit.core.schema import DatasetCase, TraceLog, AdapterOutcome
 
 
 class FakeAdapter(BaseAdapter):
@@ -17,28 +13,32 @@ class FakeAdapter(BaseAdapter):
     It returns a predictable output so evaluation is easy to understand.
     """
 
-    def generate(self, prompt: str) -> str:
-        # Always returns the same answer for simplicity
-        return "Hello, this is a fake response!"
+    def prepare(self):
+        # No preparation needed
+        pass
+
+    def execute(self, case: DatasetCase, trace: TraceLog) -> AdapterOutcome:
+        # Create predictable output
+        output = f"Fake response to: {case.prompt}"
+        return AdapterOutcome(output=output)
 
 
 def main():
-    # Step 1 — Prepare the adapter
+    # Step 1 — Create a FakeAdapter
     adapter = FakeAdapter()
 
-    # Step 2 — Create the evaluator
-    evaluator = Evaluator(adapter=adapter)
+    # Step 2 — Prepare the dataset case
+    case = DatasetCase(prompt="Say hello!")
 
-    # Step 3 — Prepare an example prompt
-    prompt = "Say hello!"
+    # Step 3 — Prepare a trace log
+    trace = TraceLog()
 
-    # Step 4 — Run the evaluation
-    result = evaluator.evaluate(prompt)
+    # Step 4 — Execute using the adapter
+    result = adapter.execute(case, trace)
 
-    # Step 5 — Print the output
-    print("Prompt:", prompt)
+    # Step 5 — Print results
+    print("Prompt:", case.prompt)
     print("Model Output:", result.output)
-    print("Evaluation Score:", result.score)
 
 
 if __name__ == "__main__":
